@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>절대 색감 게임</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="start-screen">
+            <h1>절대 색감 게임</h1>
+            <p>주어진 색상과 동일한 색상을 찾아보세요!</p>
+            <button id="start-button">게임 시작</button>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div class="game-info">
+                <span id="round-info">라운드: 1</span>
+                <span id="score-info">점수: 0</span>
+            </div>
+            <div id="target-color-container">
+                <div id="target-color"></div>
+            </div>
+            <div id="color-options"></div>
+        </div>
+
+        <div id="end-screen" class="hidden">
+            <h2>게임 종료!</h2>
+            <p>최종 점수: <span id="final-score">0</span></p>
+            <input type="text" id="player-name" placeholder="이름을 입력하세요">
+            <button id="save-score-button">점수 저장</button>
+            <button id="restart-button">다시 시작</button>
+            <div id="ranking">
+                <h3>🏆 랭킹</h3>
+                <ul id="ranking-list"></ul>
+            </div>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

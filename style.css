@@ -1,0 +1,128 @@
+body {
+    font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7f9;
+    color: #333;
+    margin: 0;
+}
+
+#app {
+    width: 90%;
+    max-width: 500px;
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    text-align: center;
+}
+
+h1, h2 {
+    color: #2c3e50;
+}
+
+p {
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+.hidden {
+    display: none;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+#restart-button, #save-score-button {
+    background-color: #2ecc71;
+}
+
+#restart-button:hover, #save-score-button:hover {
+    background-color: #27ae60;
+}
+
+input[type="text"] {
+    padding: 10px;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 16px;
+    margin: 10px 0;
+    width: calc(100% - 24px);
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #34495e;
+}
+
+#target-color-container {
+    margin: 20px 0;
+}
+
+#target-color {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    border-radius: 12px;
+    border: 5px solid #ecf0f1;
+}
+
+#color-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.color-box {
+    width: 100%;
+    height: 100px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.color-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#ranking {
+    margin-top: 30px;
+    text-align: left;
+}
+
+#ranking-list {
+    list-style: none;
+    padding: 0;
+}
+
+#ranking-list li {
+    padding: 8px 12px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+#ranking-list li:nth-child(odd) {
+    background-color: #f9f9f9;
+}
