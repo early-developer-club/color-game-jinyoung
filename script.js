@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Firebase 설정 ---
+    // --- Firebase 설정 (보안을 위해 실제 값은 환경 변수 사용 권장) ---
     const firebaseConfig = {
         apiKey: "AIzaSyBYs_CBd95ECMV50T8sYryXzgXx_rrakdU",
         authDomain: "color-game-jinyoung.firebaseapp.com",
@@ -8,10 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         storageBucket: "color-game-jinyoung.firebasestorage.app",
         messagingSenderId: "518208146135",
         appId: "1:518208146135:web:1ba7f4cad42aa6c842fe92",
-        measurementId: "G-SPYLGLRS0R"
     };
-
-    // Firebase 초기화
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
@@ -19,32 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const startScreen = document.getElementById('start-screen');
     const gameScreen = document.getElementById('game-screen');
     const endScreen = document.getElementById('end-screen');
-
     const startButton = document.getElementById('start-button');
     const restartButton = document.getElementById('restart-button');
     const saveScoreButton = document.getElementById('save-score-button');
-
-    const roundInfo = document.getElementById('round-info');
+    const timeInfo = document.getElementById('time-info');
     const scoreInfo = document.getElementById('score-info');
-    const targetColorDiv = document.getElementById('target-color');
-    const colorOptionsContainer = document.getElementById('color-options');
+    const gridContainer = document.getElementById('grid-container');
     const finalScoreSpan = document.getElementById('final-score');
     const playerNameInput = document.getElementById('player-name');
     const rankingList = document.getElementById('ranking-list');
 
+    // --- 게임 설정 ---
+    const INITIAL_TIME = 30;
+    const TIME_BONUS = 1;
+
     // --- 게임 상태 변수 ---
     let score = 0;
-    let round = 0;
-    let targetColor;
-
-    // --- 유틸리티 함수 ---
-    const randomColor = () => `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
-    const shuffleArray = (array) => {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    };
+    let timeLeft = INITIAL_TIME;
+    let timerInterval = null;
 
     // --- 화면 관리 ---
     function showScreen(screen) {
@@ -54,95 +43,113 @@ document.addEventListener('DOMContentLoaded', () => {
         screen.classList.remove('hidden');
     }
 
+    // --- 타이머 로직 ---
+    function startTimer() {
+        stopTimer(); // 기존 타이머 중지
+        timeLeft = INITIAL_TIME;
+        timeInfo.textContent = `시간: ${timeLeft}`;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timeInfo.textContent = `시간: ${timeLeft}`;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
     // --- 게임 로직 ---
     function startGame() {
         score = 0;
-        round = 0;
-        scoreInfo.textContent = `점수: 0`;
+        scoreInfo.textContent = `점수: ${score}`;
         saveScoreButton.disabled = false;
         playerNameInput.value = '';
         showScreen(gameScreen);
-        startRound();
+        startTimer();
+        nextLevel();
     }
 
-    function startRound() {
-        round++;
-        roundInfo.textContent = `라운드: ${round}`;
-        const numOptions = Math.min(6, round + 1);
-        colorOptionsContainer.style.gridTemplateColumns = `repeat(${Math.min(3, numOptions > 3 ? 3 : 2)}, 1fr)`;
-
-        targetColor = randomColor();
-        targetColorDiv.style.backgroundColor = targetColor;
-
-        const options = [targetColor];
-        while (options.length < numOptions) options.push(randomColor());
-        shuffleArray(options);
-
-        colorOptionsContainer.innerHTML = '';
-        options.forEach(color => {
-            const colorBox = document.createElement('div');
-            colorBox.classList.add('color-box');
-            colorBox.style.backgroundColor = color;
-            colorBox.addEventListener('click', handleOptionClick);
-            colorOptionsContainer.appendChild(colorBox);
-        });
+    function nextLevel() {
+        const { gridSize, diff } = getDifficulty(score);
+        const { baseColor, oddColor, oddIndex } = generateColors(gridSize, diff);
+        displayGrid(gridSize, baseColor, oddColor, oddIndex);
     }
 
-    function handleOptionClick(event) {
-        if (event.target.style.backgroundColor === targetColor) {
+    function getDifficulty(score) {
+        let gridSize = 2;
+        if (score >= 3) gridSize = 3;
+        if (score >= 8) gridSize = 4;
+        if (score >= 15) gridSize = 5;
+        if (score >= 25) gridSize = 6;
+        const diff = Math.max(10, 40 - score * 1.5);
+        return { gridSize, diff };
+    }
+
+    function generateColors(gridSize, diff) {
+        const r = Math.floor(Math.random() * 226);
+        const g = Math.floor(Math.random() * 226);
+        const b = Math.floor(Math.random() * 226);
+        const baseColor = `rgb(${r}, ${g}, ${b})`;
+        const oddColor = `rgb(${r + diff}, ${g + diff}, ${b + diff})`;
+        const oddIndex = Math.floor(Math.random() * gridSize * gridSize);
+        return { baseColor, oddColor, oddIndex };
+    }
+
+    function displayGrid(gridSize, baseColor, oddColor, oddIndex) {
+        gridContainer.innerHTML = '';
+        gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            const isOddOne = (i === oddIndex);
+            cell.style.backgroundColor = isOddOne ? oddColor : baseColor;
+            cell.dataset.correct = isOddOne;
+            cell.addEventListener('click', handleCellClick);
+            gridContainer.appendChild(cell);
+        }
+    }
+
+    function handleCellClick(event) {
+        if (event.target.dataset.correct === 'true') {
             score++;
             scoreInfo.textContent = `점수: ${score}`;
-            startRound();
+            timeLeft += TIME_BONUS;
+            timeInfo.textContent = `시간: ${timeLeft}`;
+            nextLevel();
         } else {
-            endGame();
+            // 오답 클릭 시 시간 차감 (옵션)
+            // timeLeft = Math.max(0, timeLeft - 2);
+            // timeInfo.textContent = `시간: ${timeLeft}`;
         }
     }
 
     function endGame() {
+        stopTimer();
         finalScoreSpan.textContent = score;
         showScreen(endScreen);
         fetchRanking();
     }
 
-    // --- Firebase 연동 함수 ---
+    // --- Firebase 연동 (기존과 동일) ---
     function saveScore() {
         const playerName = playerNameInput.value.trim();
-        if (!playerName) {
-            alert('이름을 입력해주세요!');
-            return;
-        }
-
-        const scoresRef = database.ref('scores');
-        scoresRef.push({
-            name: playerName,
-            score: score,
-            timestamp: Date.now()
-        }).then(() => {
-            saveScoreButton.disabled = true;
-            fetchRanking(); // 랭킹 새로고침
-        }).catch(error => {
-            console.error("점수 저장에 실패했습니다:", error);
-            alert("점수 저장에 실패했습니다. 다시 시도해주세요.");
-        });
+        if (!playerName) { alert('이름을 입력해주세요!'); return; }
+        database.ref('scores').push({ name: playerName, score: score, timestamp: Date.now() })
+            .then(() => { saveScoreButton.disabled = true; fetchRanking(); })
+            .catch(error => console.error("점수 저장 실패:", error));
     }
 
     function fetchRanking() {
         const scoresRef = database.ref('scores');
         rankingList.innerHTML = '<li>불러오는 중...</li>';
-
         scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
             const scores = [];
-            snapshot.forEach((childSnapshot) => {
-                scores.push(childSnapshot.val());
-            });
-            scores.reverse(); // 내림차순 정렬
-
-            rankingList.innerHTML = '';
-            if (scores.length === 0) {
-                rankingList.innerHTML = '<li>아직 랭킹이 없습니다.</li>';
-                return;
-            }
-
+            snapshot.forEach(child => { scores.push(child.val()); });
+            scores.reverse();
+            rankingList.innerHTML = scores.length ? '' : '<li>아직 랭킹이 없습니다.</li>';
             scores.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.textContent = `${index + 1}. ${item.name}: ${item.score}점`;
