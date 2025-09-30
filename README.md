@@ -7,6 +7,7 @@
   - **프론트엔드:** HTML, CSS, JavaScript (프레임워크 없음)
   - **데이터베이스:** Firebase Realtime Database
   - **배포:** Netlify
+  - **배포주소:** https://color-game-jinyoung.netlify.app/
 
 ---
 
