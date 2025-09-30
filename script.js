@@ -25,10 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScoreSpan = document.getElementById('final-score');
     const playerNameInput = document.getElementById('player-name');
     const rankingList = document.getElementById('ranking-list');
+    const bgMusic = document.getElementById('bg-music');
 
     // --- 게임 설정 ---
     const INITIAL_TIME = 30;
     const TIME_BONUS = 1;
+    const PENALTY_TIME = 2;
 
     // --- 게임 상태 변수 ---
     let score = 0;
@@ -70,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen(gameScreen);
         startTimer();
         nextLevel();
+        bgMusic.play();
     }
 
     function nextLevel() {
@@ -120,9 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
             timeInfo.textContent = `시간: ${timeLeft}`;
             nextLevel();
         } else {
-            // 오답 클릭 시 시간 차감 (옵션)
-            // timeLeft = Math.max(0, timeLeft - 2);
-            // timeInfo.textContent = `시간: ${timeLeft}`;
+            timeLeft = Math.max(0, timeLeft - PENALTY_TIME);
+            timeInfo.textContent = `시간: ${timeLeft}`;
         }
     }
 
@@ -131,6 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScoreSpan.textContent = score;
         showScreen(endScreen);
         fetchRanking();
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
     }
 
     // --- Firebase 연동 (기존과 동일) ---
